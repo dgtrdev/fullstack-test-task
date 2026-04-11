@@ -1,12 +1,12 @@
 import asyncio
-import os
 from pathlib import Path
 from celery import Celery
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from src.db import async_session_maker
 from src.models import Alert, StoredFile
-from src.service import STORAGE_DIR, DB_URL
+from src.settings import settings
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://backend-redis:6379/0")
+REDIS_URL = settings.redis_url
+STORAGE_DIR = settings.storage_dir
 _worker_loop: asyncio.AbstractEventLoop | None = None
 
 
@@ -19,8 +19,6 @@ def run_in_worker_loop(coroutine):
 
 
 celery_app = Celery("file_tasks", broker=REDIS_URL, backend=REDIS_URL)
-engine = create_async_engine(DB_URL)
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def _scan_file_for_threats(file_id: str) -> None:
