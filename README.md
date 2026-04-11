@@ -19,3 +19,19 @@
 **Открыть фронт:** ```http://localhost:3000/test``` 
 
 **Открыть бэк:** ```http://localhost:8000/docs```
+
+## Выполненные правки
+
+### Инфраструктура и конфигурация
+
+- Разделены env-файлы backend и frontend: backend использует `backend/.env.dev`, frontend использует `frontend/.env.dev`.
+- Исправлена dev-сборка frontend: `docker-compose.dev.yml` теперь использует отдельный `frontend/Dockerfile.dev` и запускает Next.js через `npm run dev`.
+- Production-сборка frontend оставлена в `frontend/Dockerfile`; для неё `NEXT_PUBLIC_API_URL` передаётся через `--build-arg`.
+- Убран неиспользуемый `frontend/Dockerfile.bun`, так как проект использует npm и `package-lock.json`.
+- Исправлен проброс порта PostgreSQL в docker-compose: с хоста база доступна на `5433`, внутри docker-сети используется стандартный порт `5432`.
+
+### Frontend
+
+- Убран хардкод backend URL из страницы управления файлами.
+- Добавлен общий frontend-конфиг `frontend/src/shared/config/api.ts` для построения API URL через `NEXT_PUBLIC_API_URL`.
+- Обновлена документация frontend: описаны env-переменные, dev-запуск и пример production-сборки.
