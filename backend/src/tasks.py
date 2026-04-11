@@ -2,11 +2,11 @@ import asyncio
 from pathlib import Path
 from celery import Celery
 from src.db import async_session_maker
+from src.infrastructure.storage import get_stored_file_path
 from src.models import Alert, StoredFile
 from src.settings import settings
 
 REDIS_URL = settings.redis_url
-STORAGE_DIR = settings.storage_dir
 _worker_loop: asyncio.AbstractEventLoop | None = None
 
 
@@ -54,7 +54,7 @@ async def _extract_file_metadata(file_id: str) -> None:
         if not file_item:
             return
 
-        stored_path = STORAGE_DIR / file_item.stored_name
+        stored_path = get_stored_file_path(file_item.stored_name)
         if not stored_path.exists():
             file_item.processing_status = "failed"
             file_item.scan_status = file_item.scan_status or "failed"
