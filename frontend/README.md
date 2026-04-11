@@ -19,7 +19,15 @@ Production-сборка использует `Dockerfile` и ожидает `NEX
 ```bash
 docker build \
   -f frontend/Dockerfile \
-  --build-arg NEXT_PUBLIC_API_URL=https://api.example.com \
-  -t frontend-prod \
+  --build-arg NEXT_PUBLIC_API_URL=http://localhost:8000 \
+  -t fullstack-frontend-prod \
   ./frontend
+```
+
+Запуск собранного production-образа:
+
+```bash
+docker run --rm \
+  -p 3000:3000 \
+  fullstack-frontend-prod
 ```
