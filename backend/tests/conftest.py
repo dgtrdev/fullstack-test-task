@@ -4,10 +4,6 @@ import shutil
 import asyncpg
 import pytest_asyncio
 
-from src.db import engine
-from src.models import Base
-from src.settings import settings
-
 
 TEST_DATABASE = "test_test"
 
@@ -24,6 +20,10 @@ os.environ.update(
         "STORAGE_DIR": "storage/test-files",
     }
 )
+
+from src.db import engine
+from src.models import Base
+from src.settings import settings
 
 
 async def ensure_test_database_exists() -> None:

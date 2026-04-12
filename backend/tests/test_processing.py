@@ -1,5 +1,42 @@
-from src.models import StoredFile
-from src.services.processing import get_safety_reasons
+from datetime import UTC, datetime
+
+import pytest
+from sqlalchemy import select
+
+from src.db import async_session_maker
+from src.models import Alert, StoredFile
+from src.services.processing import check_file_safety, create_processing_alert, get_file_metadata, get_safety_reasons
+
+
+@pytest.mark.asyncio
+async def test_processing_skips_deleted_file(reset_database):
+    async with async_session_maker() as session:
+        file_item = StoredFile(
+            id="deleted-file-id",
+            title="Deleted document",
+            original_name="document.txt",
+            stored_name="deleted-file-id.txt",
+            mime_type="text/plain",
+            size=1024,
+            processing_status="uploaded",
+            deleted_at=datetime.now(UTC),
+        )
+        session.add(file_item)
+        await session.commit()
+
+    await check_file_safety(file_item.id)
+    await get_file_metadata(file_item.id)
+    await create_processing_alert(file_item.id)
+
+    async with async_session_maker() as session:
+        stored_file = await session.get(StoredFile, file_item.id)
+        alerts = list(await session.scalars(select(Alert).where(Alert.file_id == file_item.id)))
+
+    assert stored_file is not None
+    assert stored_file.processing_status == "uploaded"
+    assert stored_file.scan_status is None
+    assert stored_file.metadata_json is None
+    assert alerts == []
 
 
 def make_file(

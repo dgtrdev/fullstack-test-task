@@ -24,7 +24,7 @@ def get_safety_reasons(file_item: StoredFile) -> list[str]:
 async def check_file_safety(file_id: str) -> None:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             return
 
         file_item.processing_status = "processing"
@@ -38,7 +38,7 @@ async def check_file_safety(file_id: str) -> None:
 async def get_file_metadata(file_id: str) -> None:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             return
 
         stored_path = get_stored_file_path(file_item.stored_name)
@@ -71,7 +71,7 @@ async def get_file_metadata(file_id: str) -> None:
 async def create_processing_alert(file_id: str) -> None:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             return
 
         if file_item.processing_status == "failed":
