@@ -43,3 +43,8 @@
 - Убран хардкод backend URL из страницы управления файлами.
 - Добавлен общий frontend-конфиг `frontend/src/shared/config/api.ts` для построения API URL через `NEXT_PUBLIC_API_URL`.
 - Обновлена документация frontend: описаны env-переменные, dev-запуск и пример production-сборки.
+
+### Тесты
+
+- Добавлены unit-тесты backend-логики для валидации названия файла и правил проверки безопасности файла.
+- Запуск backend-тестов: `docker compose -f docker-compose.dev.yml run --rm --no-deps backend python -m pytest`.
