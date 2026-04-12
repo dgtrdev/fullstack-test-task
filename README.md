@@ -28,6 +28,7 @@
 - В backend добавлен отдельный слой настроек на `pydantic-settings`: переменные окружения, CORS origins, URL базы, Redis/Celery URL и путь хранения убраны из `app.py`, `service.py` и `tasks.py`.
 - Подключение к базе вынесено в отдельный модуль `backend/src/db.py`; сервисы и Celery-задачи используют общий session maker.
 - Монолитный `backend/src/service.py` разделён на сервисы файлов и алертов, а работа с файловым хранилищем вынесена в `backend/src/infrastructure/storage.py`.
+- Логика проверки безопасности файла, получения metadata и создания alert вынесена из Celery-задач в `backend/src/services/processing.py`.
 - Исправлена dev-сборка frontend: `docker-compose.dev.yml` теперь использует отдельный `frontend/Dockerfile.dev` и запускает Next.js через `npm run dev`.
 - Production-сборка frontend оставлена в `frontend/Dockerfile`; для неё `NEXT_PUBLIC_API_URL` передаётся через `--build-arg`.
 - Убран неиспользуемый `frontend/Dockerfile.bun`, так как проект использует npm и `package-lock.json`.
