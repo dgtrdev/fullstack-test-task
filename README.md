@@ -43,6 +43,7 @@
 
 - Убран хардкод backend URL из страницы управления файлами.
 - Добавлен общий frontend-конфиг `frontend/src/shared/config/api.ts` для построения API URL через `NEXT_PUBLIC_API_URL`.
+- Упрощён root layout: убрана лишняя Bootstrap-обёртка, исправлен путь к favicon.
 - Обновлена документация frontend: описаны env-переменные, dev-запуск и пример production-сборки.
 
 ### Тесты

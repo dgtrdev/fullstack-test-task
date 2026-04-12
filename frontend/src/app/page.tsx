@@ -39,6 +39,13 @@ type AlertItem = {
   created_at: string;
 };
 
+type PaginatedResponse<T> = {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -90,6 +97,8 @@ function getProcessingVariant(status: string) {
 export default function Page() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [filesTotal, setFilesTotal] = useState(0);
+  const [alertsTotal, setAlertsTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -112,12 +121,14 @@ export default function Page() {
       }
 
       const [filesData, alertsData] = await Promise.all([
-        filesResponse.json() as Promise<FileItem[]>,
-        alertsResponse.json() as Promise<AlertItem[]>,
+        filesResponse.json() as Promise<PaginatedResponse<FileItem>>,
+        alertsResponse.json() as Promise<PaginatedResponse<AlertItem>>,
       ]);
 
-      setFiles(filesData);
-      setAlerts(alertsData);
+      setFiles(filesData.items);
+      setFilesTotal(filesData.total);
+      setAlerts(alertsData.items);
+      setAlertsTotal(alertsData.total);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Произошла ошибка");
     } finally {
@@ -200,7 +211,7 @@ export default function Page() {
             <Card.Header className="bg-white border-0 pt-4 px-4">
               <div className="d-flex justify-content-between align-items-center">
                 <h2 className="h5 mb-0">Файлы</h2>
-                <Badge bg="secondary">{files.length}</Badge>
+                <Badge bg="secondary">{filesTotal}</Badge>
               </div>
             </Card.Header>
             <Card.Body className="px-4 pb-4">
@@ -280,7 +291,7 @@ export default function Page() {
             <Card.Header className="bg-white border-0 pt-4 px-4">
               <div className="d-flex justify-content-between align-items-center">
                 <h2 className="h5 mb-0">Алерты</h2>
-                <Badge bg="secondary">{alerts.length}</Badge>
+                <Badge bg="secondary">{alertsTotal}</Badge>
               </div>
             </Card.Header>
             <Card.Body className="px-4 pb-4">
