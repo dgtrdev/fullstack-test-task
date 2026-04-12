@@ -1,6 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+MAX_FILE_TITLE_LENGTH = 255
+
+
+def normalize_file_title(title: str) -> str:
+    normalized_title = title.strip()
+    if not normalized_title:
+        raise ValueError("Название файла не может быть пустым")
+    if len(normalized_title) > MAX_FILE_TITLE_LENGTH:
+        raise ValueError(f"Название файла не может быть длиннее {MAX_FILE_TITLE_LENGTH} символов")
+
+    return normalized_title
 
 
 class FileItem(BaseModel):
@@ -21,7 +34,12 @@ class FileItem(BaseModel):
 
 
 class FileUpdate(BaseModel):
-    title: str
+    title: str = Field(..., max_length=MAX_FILE_TITLE_LENGTH)
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        return normalize_file_title(value)
 
 
 class AlertItem(BaseModel):

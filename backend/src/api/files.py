@@ -1,7 +1,7 @@
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 
-from src.schemas import FileItem, FileUpdate
+from src.schemas import FileItem, FileUpdate, normalize_file_title
 from src.services.files import create_file, delete_file, get_file, get_file_path, list_files, update_file
 from src.tasks import scan_file_for_threats
 
@@ -19,7 +19,15 @@ async def create_file_view(
     title: str = Form(...),
     file: UploadFile = File(...),
 ):
-    file_item = await create_file(title=title, upload_file=file)
+    try:
+        normalized_title = normalize_file_title(title)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        )
+
+    file_item = await create_file(title=normalized_title, upload_file=file)
     scan_file_for_threats.delay(file_item.id)
     return file_item
 
