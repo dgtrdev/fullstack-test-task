@@ -3,17 +3,20 @@ from pathlib import Path
 from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from src.db import async_session_maker
 from src.infrastructure.storage import delete_stored_file, get_existing_file_path, save_upload_file
 from src.models import StoredFile
 
 
-async def list_files() -> list[StoredFile]:
+async def list_files(limit: int, offset: int) -> tuple[list[StoredFile], int]:
     async with async_session_maker() as session:
-        result = await session.execute(select(StoredFile).order_by(StoredFile.created_at.desc()))
-        return list(result.scalars().all())
+        total = await session.scalar(select(func.count()).select_from(StoredFile))
+        result = await session.execute(
+            select(StoredFile).order_by(StoredFile.created_at.desc()).limit(limit).offset(offset)
+        )
+        return list(result.scalars().all()), total or 0
 
 
 async def get_file(file_id: str) -> StoredFile:

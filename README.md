@@ -31,6 +31,7 @@
 - Логика проверки безопасности файла, получения metadata и создания alert вынесена из Celery-задач в `backend/src/services/processing.py`.
 - API-роуты вынесены из `backend/src/app.py` в отдельные модули в `backend/src/api/`.
 - Добавлена валидация названия файла при загрузке и обновлении: пустые значения запрещены, пробелы по краям удаляются, длина ограничена 255 символами.
+- Добавлена backend-пагинация для `GET /files` и `GET /alerts` через параметры `limit` и `offset`.
 - Исправлена dev-сборка frontend: `docker-compose.dev.yml` теперь использует отдельный `frontend/Dockerfile.dev` и запускает Next.js через `npm run dev`.
 - Production-сборка frontend оставлена в `frontend/Dockerfile`; для неё `NEXT_PUBLIC_API_URL` передаётся через `--build-arg`.
 - Убран неиспользуемый `frontend/Dockerfile.bun`, так как проект использует npm и `package-lock.json`.

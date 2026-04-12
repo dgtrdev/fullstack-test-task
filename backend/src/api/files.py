@@ -1,7 +1,10 @@
+from typing import Annotated
+
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import Query
 from fastapi.responses import FileResponse
 
-from src.schemas import FileItem, FileUpdate, normalize_file_title
+from src.schemas import DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, FileItem, FileListResponse, FileUpdate, normalize_file_title
 from src.services.files import create_file, delete_file, get_file, get_file_path, list_files, update_file
 from src.tasks import scan_file_for_threats
 
@@ -9,9 +12,18 @@ from src.tasks import scan_file_for_threats
 router = APIRouter()
 
 
-@router.get("/files", response_model=list[FileItem])
-async def list_files_view():
-    return await list_files()
+@router.get("/files", response_model=FileListResponse)
+async def list_files_view(
+    limit: Annotated[int, Query(ge=1, le=MAX_PAGE_LIMIT)] = DEFAULT_PAGE_LIMIT,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    files, total = await list_files(limit=limit, offset=offset)
+    return FileListResponse(
+        items=[FileItem.model_validate(file_item) for file_item in files],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.post("/files", response_model=FileItem, status_code=201)

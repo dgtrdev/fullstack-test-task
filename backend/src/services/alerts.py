@@ -1,13 +1,14 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from src.db import async_session_maker
 from src.models import Alert
 
 
-async def list_alerts() -> list[Alert]:
+async def list_alerts(limit: int, offset: int) -> tuple[list[Alert], int]:
     async with async_session_maker() as session:
-        result = await session.execute(select(Alert).order_by(Alert.created_at.desc()))
-        return list(result.scalars().all())
+        total = await session.scalar(select(func.count()).select_from(Alert))
+        result = await session.execute(select(Alert).order_by(Alert.created_at.desc()).limit(limit).offset(offset))
+        return list(result.scalars().all()), total or 0
 
 
 async def create_alert(file_id: str, level: str, message: str) -> Alert:

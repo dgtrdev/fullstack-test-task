@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 MAX_FILE_TITLE_LENGTH = 255
+DEFAULT_PAGE_LIMIT = 10
+MAX_PAGE_LIMIT = 100
 
 
 def normalize_file_title(title: str) -> str:
@@ -50,3 +52,17 @@ class AlertItem(BaseModel):
     level: str
     message: str
     created_at: datetime
+
+
+class FileListResponse(BaseModel):
+    items: list[FileItem]
+    total: int
+    limit: int
+    offset: int
+
+
+class AlertListResponse(BaseModel):
+    items: list[AlertItem]
+    total: int
+    limit: int
+    offset: int
