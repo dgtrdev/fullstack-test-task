@@ -47,5 +47,6 @@
 ### Тесты
 
 - Добавлены unit-тесты backend-логики для валидации названия файла и правил проверки безопасности файла.
-- Добавлена базовая pytest-конфигурация backend и отдельный `backend/.env.test` для интеграционных тестов.
-- Запуск backend-тестов: `docker compose -f docker-compose.dev.yml run --rm --no-deps backend pytest`.
+- Добавлена pytest-конфигурация backend; тестовое окружение задаётся в `backend/tests/conftest.py`.
+- Добавлены интеграционные тесты backend-сервисов для пагинации файлов, пагинации алертов и мягкого удаления файла.
+- Запуск backend-тестов: `docker compose -f docker-compose.dev.yml run --rm backend pytest`.
