@@ -33,6 +33,7 @@ class FileItem(BaseModel):
     requires_attention: bool
     created_at: datetime
     updated_at: datetime
+    deleted_at: datetime | None
 
 
 class FileUpdate(BaseModel):

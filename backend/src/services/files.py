@@ -1,4 +1,5 @@
 import mimetypes
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -7,14 +8,19 @@ from sqlalchemy import func, select
 
 from src.db import async_session_maker
 from src.infrastructure.storage import delete_stored_file, get_existing_file_path, save_upload_file
-from src.models import StoredFile
+from src.models import Alert, StoredFile
 
 
 async def list_files(limit: int, offset: int) -> tuple[list[StoredFile], int]:
     async with async_session_maker() as session:
-        total = await session.scalar(select(func.count()).select_from(StoredFile))
+        active_files_filter = StoredFile.deleted_at.is_(None)
+        total = await session.scalar(select(func.count()).select_from(StoredFile).where(active_files_filter))
         result = await session.execute(
-            select(StoredFile).order_by(StoredFile.created_at.desc()).limit(limit).offset(offset)
+            select(StoredFile)
+            .where(active_files_filter)
+            .order_by(StoredFile.created_at.desc())
+            .limit(limit)
+            .offset(offset)
         )
         return list(result.scalars().all()), total or 0
 
@@ -22,7 +28,7 @@ async def list_files(limit: int, offset: int) -> tuple[list[StoredFile], int]:
 async def get_file(file_id: str) -> StoredFile:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         return file_item
 
@@ -52,7 +58,7 @@ async def create_file(title: str, upload_file: UploadFile) -> StoredFile:
 async def update_file(file_id: str, title: str) -> StoredFile:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         file_item.title = title
         await session.commit()
@@ -63,10 +69,11 @@ async def update_file(file_id: str, title: str) -> StoredFile:
 async def delete_file(file_id: str) -> None:
     async with async_session_maker() as session:
         file_item = await session.get(StoredFile, file_id)
-        if not file_item:
+        if not file_item or file_item.deleted_at is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
         delete_stored_file(file_item.stored_name)
-        await session.delete(file_item)
+        file_item.deleted_at = datetime.now(UTC)
+        session.add(Alert(file_id=file_id, level="info", message="File deleted"))
         await session.commit()
 
 
