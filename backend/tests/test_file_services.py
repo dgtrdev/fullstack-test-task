@@ -16,9 +16,15 @@ class FakeUploadFile:
         self.filename = filename
         self.content_type = content_type
         self._content = content
+        self._position = 0
 
-    async def read(self) -> bytes:
-        return self._content
+    async def read(self, size: int = -1) -> bytes:
+        if size < 0:
+            size = len(self._content) - self._position
+
+        chunk = self._content[self._position : self._position + size]
+        self._position += len(chunk)
+        return chunk
 
 
 async def create_test_file(title: str):
@@ -38,6 +44,21 @@ async def test_list_files_returns_paginated_active_files(reset_database):
 
     assert total == 3
     assert len(files) == 2
+
+
+@pytest.mark.asyncio
+async def test_create_file_rejects_empty_upload(reset_database):
+    with pytest.raises(HTTPException) as error:
+        await create_file(
+            title="empty",
+            upload_file=FakeUploadFile(filename="empty.txt", content=b""),
+        )
+
+    files, total = await list_files(limit=10, offset=0)
+
+    assert error.value.status_code == 400
+    assert files == []
+    assert total == 0
 
 
 @pytest.mark.asyncio
