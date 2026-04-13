@@ -45,6 +45,8 @@
 - Добавлен общий frontend-конфиг `frontend/src/shared/config/api.ts` для построения API URL через `NEXT_PUBLIC_API_URL`.
 - Упрощён root layout: убрана лишняя Bootstrap-обёртка, исправлен путь к favicon.
 - Обновлена документация frontend: описаны env-переменные, dev-запуск и пример production-сборки.
+- Добавлены frontend-слои `shared/api` и `shared/types`: запросы к backend вынесены из `page.tsx`.
+- Добавлена пагинация на фронтенд: данные берутся из `items`, счётчики показывают `total`.
 
 ### Тесты
 

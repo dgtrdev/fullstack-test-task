@@ -14,37 +14,10 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { buildApiUrl } from "../shared/config/api";
-
-type FileItem = {
-  id: string;
-  title: string;
-  original_name: string;
-  mime_type: string;
-  size: number;
-  processing_status: string;
-  scan_status: string | null;
-  scan_details: string | null;
-  metadata_json: Record<string, unknown> | null;
-  requires_attention: boolean;
-  created_at: string;
-  updated_at: string;
-};
-
-type AlertItem = {
-  id: number;
-  file_id: string;
-  level: string;
-  message: string;
-  created_at: string;
-};
-
-type PaginatedResponse<T> = {
-  items: T[];
-  total: number;
-  limit: number;
-  offset: number;
-};
+import { fetchAlerts } from "../shared/api/alerts";
+import { fetchFiles, getFileDownloadUrl, uploadFile } from "../shared/api/files";
+import type { AlertItem } from "../shared/types/alerts";
+import type { FileItem } from "../shared/types/files";
 
 
 function formatDate(value: string) {
@@ -111,18 +84,9 @@ export default function Page() {
     setErrorMessage(null);
 
     try {
-      const [filesResponse, alertsResponse] = await Promise.all([
-        fetch(buildApiUrl("/files"), { cache: "no-store" }),
-        fetch(buildApiUrl("/alerts"), { cache: "no-store" }),
-      ]);
-
-      if (!filesResponse.ok || !alertsResponse.ok) {
-        throw new Error("Не удалось загрузить данные");
-      }
-
       const [filesData, alertsData] = await Promise.all([
-        filesResponse.json() as Promise<PaginatedResponse<FileItem>>,
-        alertsResponse.json() as Promise<PaginatedResponse<AlertItem>>,
+        fetchFiles(),
+        fetchAlerts(),
       ]);
 
       setFiles(filesData.items);
@@ -151,20 +115,8 @@ export default function Page() {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const formData = new FormData();
-    formData.append("title", title.trim());
-    formData.append("file", selectedFile);
-
     try {
-      const response = await fetch(buildApiUrl("/files"), {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Не удалось загрузить файл");
-      }
-
+      await uploadFile(title.trim(), selectedFile);
       setShowModal(false);
       setTitle("");
       setSelectedFile(null);
@@ -270,7 +222,7 @@ export default function Page() {
                             <td className="text-nowrap">
                               <Button
                                 as="a"
-                                href={buildApiUrl(`/files/${file.id}/download`)}
+                                href={getFileDownloadUrl(file.id)}
                                 variant="outline-primary"
                                 size="sm"
                               >
