@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     depends_on:
       - backend-db
+      - backend-redis
 
   backend-worker:
     build: ./backend
@@ -20,6 +21,7 @@ services:
       - ./backend:/backend
     depends_on:
       - backend-db
+      - backend-redis
 
   backend-db:
     image: postgres:latest
