@@ -86,9 +86,9 @@ export function FilesTable({
                           <Badge bg={file.requires_attention ? "warning" : "success"}>
                             {file.scan_status ?? "pending"}
                           </Badge>
-                          <span className="small text-secondary">
-                            {file.scan_details ?? "Ожидает обработки"}
-                          </span>
+                          {file.scan_status !== "clean" && file.scan_details ? (
+                            <span className="small text-secondary">{file.scan_details}</span>
+                          ) : null}
                         </div>
                       </td>
                       <td>{formatDate(file.created_at)}</td>
