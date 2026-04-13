@@ -18,7 +18,7 @@ import type { AlertItem } from "../shared/types/alerts";
 import type { FileItem } from "../shared/types/files";
 
 
-const PAGE_LIMIT = 2;
+const PAGE_LIMIT = 10;
 
 
 export default function Page() {
@@ -95,7 +95,7 @@ export default function Page() {
       setShowModal(false);
       setTitle("");
       setSelectedFile(null);
-      await Promise.all([loadFiles(0), loadAlerts(alertsOffset)]);
+      await Promise.all([loadFiles(0), loadAlerts(0)]);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Произошла ошибка");
     } finally {

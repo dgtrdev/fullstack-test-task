@@ -17,6 +17,10 @@ export function TablePagination({
   isLoading,
   onOffsetChange,
 }: TablePaginationProps) {
+  if (total <= limit) {
+    return null;
+  }
+
   const pageStart = total === 0 ? 0 : offset + 1;
   const pageEnd = Math.min(offset + limit, total);
   const previousOffset = Math.max(offset - limit, 0);
