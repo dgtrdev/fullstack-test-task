@@ -1,4 +1,4 @@
-import { Badge, Card, Spinner, Table } from "react-bootstrap";
+import { Alert, Badge, Card, Spinner, Table } from "react-bootstrap";
 
 import { getLevelVariant } from "../shared/lib/badges";
 import { formatDate } from "../shared/lib/format";
@@ -7,12 +7,13 @@ import type { AlertItem } from "../shared/types/alerts";
 
 type AlertsTableProps = {
   alerts: AlertItem[];
+  errorMessage: string | null;
   total: number;
   isLoading: boolean;
 };
 
 
-export function AlertsTable({ alerts, total, isLoading }: AlertsTableProps) {
+export function AlertsTable({ alerts, errorMessage, total, isLoading }: AlertsTableProps) {
   return (
     <Card className="shadow-sm border-0">
       <Card.Header className="bg-white border-0 pt-4 px-4">
@@ -22,7 +23,11 @@ export function AlertsTable({ alerts, total, isLoading }: AlertsTableProps) {
         </div>
       </Card.Header>
       <Card.Body className="px-4 pb-4">
-        {isLoading ? (
+        {errorMessage ? (
+          <Alert variant="danger" className="mb-0">
+            {errorMessage}
+          </Alert>
+        ) : isLoading ? (
           <div className="d-flex justify-content-center py-5">
             <Spinner animation="border" />
           </div>

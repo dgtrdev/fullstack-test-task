@@ -23,36 +23,53 @@ export default function Page() {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [filesTotal, setFilesTotal] = useState(0);
   const [alertsTotal, setAlertsTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFilesLoading, setIsFilesLoading] = useState(true);
+  const [isAlertsLoading, setIsAlertsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filesErrorMessage, setFilesErrorMessage] = useState<string | null>(null);
+  const [alertsErrorMessage, setAlertsErrorMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function loadData() {
-    setIsLoading(true);
-    setErrorMessage(null);
+  async function loadFiles() {
+    setIsFilesLoading(true);
+    setFilesErrorMessage(null);
 
     try {
-      const [filesData, alertsData] = await Promise.all([
-        fetchFiles(),
-        fetchAlerts(),
-      ]);
-
+      const filesData = await fetchFiles();
       setFiles(filesData.items);
       setFilesTotal(filesData.total);
-      setAlerts(alertsData.items);
-      setAlertsTotal(alertsData.total);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Произошла ошибка");
+      setFilesErrorMessage(error instanceof Error ? error.message : "Не удалось загрузить файлы");
     } finally {
-      setIsLoading(false);
+      setIsFilesLoading(false);
     }
   }
 
+  async function loadAlerts() {
+    setIsAlertsLoading(true);
+    setAlertsErrorMessage(null);
+
+    try {
+      const alertsData = await fetchAlerts();
+      setAlerts(alertsData.items);
+      setAlertsTotal(alertsData.total);
+    } catch (error) {
+      setAlertsErrorMessage(error instanceof Error ? error.message : "Не удалось загрузить алерты");
+    } finally {
+      setIsAlertsLoading(false);
+    }
+  }
+
+  function loadData() {
+    void loadFiles();
+    void loadAlerts();
+  }
+
   useEffect(() => {
-    void loadData();
+    loadData();
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -71,7 +88,7 @@ export default function Page() {
       setShowModal(false);
       setTitle("");
       setSelectedFile(null);
-      await loadData();
+      await Promise.all([loadFiles(), loadAlerts()]);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Произошла ошибка");
     } finally {
@@ -93,7 +110,7 @@ export default function Page() {
                   </p>
                 </div>
                 <div className="d-flex gap-2">
-                  <Button variant="outline-secondary" onClick={() => void loadData()}>
+                  <Button variant="outline-secondary" onClick={loadData}>
                     Обновить
                   </Button>
                   <Button variant="primary" onClick={() => setShowModal(true)}>
@@ -110,8 +127,18 @@ export default function Page() {
             </Alert>
           ) : null}
 
-          <FilesTable files={files} total={filesTotal} isLoading={isLoading} />
-          <AlertsTable alerts={alerts} total={alertsTotal} isLoading={isLoading} />
+          <FilesTable
+            errorMessage={filesErrorMessage}
+            files={files}
+            total={filesTotal}
+            isLoading={isFilesLoading}
+          />
+          <AlertsTable
+            alerts={alerts}
+            errorMessage={alertsErrorMessage}
+            total={alertsTotal}
+            isLoading={isAlertsLoading}
+          />
         </Col>
       </Row>
 

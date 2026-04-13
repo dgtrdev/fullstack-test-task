@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Spinner, Table } from "react-bootstrap";
+import { Alert, Badge, Button, Card, Spinner, Table } from "react-bootstrap";
 
 import { getFileDownloadUrl } from "../shared/api/files";
 import { getProcessingVariant } from "../shared/lib/badges";
@@ -7,13 +7,14 @@ import type { FileItem } from "../shared/types/files";
 
 
 type FilesTableProps = {
+  errorMessage: string | null;
   files: FileItem[];
   total: number;
   isLoading: boolean;
 };
 
 
-export function FilesTable({ files, total, isLoading }: FilesTableProps) {
+export function FilesTable({ errorMessage, files, total, isLoading }: FilesTableProps) {
   return (
     <Card className="shadow-sm border-0 mb-4">
       <Card.Header className="bg-white border-0 pt-4 px-4">
@@ -23,7 +24,11 @@ export function FilesTable({ files, total, isLoading }: FilesTableProps) {
         </div>
       </Card.Header>
       <Card.Body className="px-4 pb-4">
-        {isLoading ? (
+        {errorMessage ? (
+          <Alert variant="danger" className="mb-0">
+            {errorMessage}
+          </Alert>
+        ) : isLoading ? (
           <div className="d-flex justify-content-center py-5">
             <Spinner animation="border" />
           </div>
