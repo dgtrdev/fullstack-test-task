@@ -1,6 +1,7 @@
 import { buildApiUrl } from "../config/api";
 import type { FileItem } from "../types/files";
 import type { PaginatedResponse, PaginationParams } from "../types/pagination";
+import { getApiErrorMessage } from "./errors";
 
 
 export async function fetchFiles({ limit, offset }: PaginationParams) {
@@ -29,7 +30,8 @@ export async function uploadFile(title: string, file: File) {
   });
 
   if (!response.ok) {
-    throw new Error("Не удалось загрузить файл");
+    const errorMessage = await getApiErrorMessage(response, "неизвестная ошибка");
+    throw new Error(`Не удалось загрузить файл: ${errorMessage}`);
   }
 
   return response.json() as Promise<FileItem>;
