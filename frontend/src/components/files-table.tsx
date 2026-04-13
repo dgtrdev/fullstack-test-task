@@ -4,17 +4,29 @@ import { getFileDownloadUrl } from "../shared/api/files";
 import { getProcessingVariant } from "../shared/lib/badges";
 import { formatDate, formatSize } from "../shared/lib/format";
 import type { FileItem } from "../shared/types/files";
+import { TablePagination } from "./table-pagination";
 
 
 type FilesTableProps = {
   errorMessage: string | null;
   files: FileItem[];
-  total: number;
   isLoading: boolean;
+  limit: number;
+  offset: number;
+  total: number;
+  onOffsetChange: (offset: number) => void;
 };
 
 
-export function FilesTable({ errorMessage, files, total, isLoading }: FilesTableProps) {
+export function FilesTable({
+  errorMessage,
+  files,
+  isLoading,
+  limit,
+  offset,
+  total,
+  onOffsetChange,
+}: FilesTableProps) {
   return (
     <Card className="shadow-sm border-0 mb-4">
       <Card.Header className="bg-white border-0 pt-4 px-4">
@@ -95,6 +107,13 @@ export function FilesTable({ errorMessage, files, total, isLoading }: FilesTable
                 )}
               </tbody>
             </Table>
+            <TablePagination
+              limit={limit}
+              offset={offset}
+              total={total}
+              isLoading={isLoading}
+              onOffsetChange={onOffsetChange}
+            />
           </div>
         )}
       </Card.Body>

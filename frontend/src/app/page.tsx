@@ -18,11 +18,16 @@ import type { AlertItem } from "../shared/types/alerts";
 import type { FileItem } from "../shared/types/files";
 
 
+const PAGE_LIMIT = 2;
+
+
 export default function Page() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [filesTotal, setFilesTotal] = useState(0);
   const [alertsTotal, setAlertsTotal] = useState(0);
+  const [filesOffset, setFilesOffset] = useState(0);
+  const [alertsOffset, setAlertsOffset] = useState(0);
   const [isFilesLoading, setIsFilesLoading] = useState(true);
   const [isAlertsLoading, setIsAlertsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,14 +38,15 @@ export default function Page() {
   const [alertsErrorMessage, setAlertsErrorMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function loadFiles() {
+  async function loadFiles(offset = filesOffset) {
     setIsFilesLoading(true);
     setFilesErrorMessage(null);
 
     try {
-      const filesData = await fetchFiles();
+      const filesData = await fetchFiles({ limit: PAGE_LIMIT, offset });
       setFiles(filesData.items);
       setFilesTotal(filesData.total);
+      setFilesOffset(filesData.offset);
     } catch (error) {
       setFilesErrorMessage(error instanceof Error ? error.message : "Не удалось загрузить файлы");
     } finally {
@@ -48,14 +54,15 @@ export default function Page() {
     }
   }
 
-  async function loadAlerts() {
+  async function loadAlerts(offset = alertsOffset) {
     setIsAlertsLoading(true);
     setAlertsErrorMessage(null);
 
     try {
-      const alertsData = await fetchAlerts();
+      const alertsData = await fetchAlerts({ limit: PAGE_LIMIT, offset });
       setAlerts(alertsData.items);
       setAlertsTotal(alertsData.total);
+      setAlertsOffset(alertsData.offset);
     } catch (error) {
       setAlertsErrorMessage(error instanceof Error ? error.message : "Не удалось загрузить алерты");
     } finally {
@@ -64,8 +71,8 @@ export default function Page() {
   }
 
   function loadData() {
-    void loadFiles();
-    void loadAlerts();
+    void loadFiles(filesOffset);
+    void loadAlerts(alertsOffset);
   }
 
   useEffect(() => {
@@ -88,7 +95,7 @@ export default function Page() {
       setShowModal(false);
       setTitle("");
       setSelectedFile(null);
-      await Promise.all([loadFiles(), loadAlerts()]);
+      await Promise.all([loadFiles(0), loadAlerts(alertsOffset)]);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Произошла ошибка");
     } finally {
@@ -130,14 +137,20 @@ export default function Page() {
           <FilesTable
             errorMessage={filesErrorMessage}
             files={files}
-            total={filesTotal}
             isLoading={isFilesLoading}
+            limit={PAGE_LIMIT}
+            offset={filesOffset}
+            total={filesTotal}
+            onOffsetChange={(offset) => void loadFiles(offset)}
           />
           <AlertsTable
             alerts={alerts}
             errorMessage={alertsErrorMessage}
-            total={alertsTotal}
             isLoading={isAlertsLoading}
+            limit={PAGE_LIMIT}
+            offset={alertsOffset}
+            total={alertsTotal}
+            onOffsetChange={(offset) => void loadAlerts(offset)}
           />
         </Col>
       </Row>

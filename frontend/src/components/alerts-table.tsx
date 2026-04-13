@@ -3,17 +3,29 @@ import { Alert, Badge, Card, Spinner, Table } from "react-bootstrap";
 import { getLevelVariant } from "../shared/lib/badges";
 import { formatDate } from "../shared/lib/format";
 import type { AlertItem } from "../shared/types/alerts";
+import { TablePagination } from "./table-pagination";
 
 
 type AlertsTableProps = {
   alerts: AlertItem[];
   errorMessage: string | null;
-  total: number;
   isLoading: boolean;
+  limit: number;
+  offset: number;
+  total: number;
+  onOffsetChange: (offset: number) => void;
 };
 
 
-export function AlertsTable({ alerts, errorMessage, total, isLoading }: AlertsTableProps) {
+export function AlertsTable({
+  alerts,
+  errorMessage,
+  isLoading,
+  limit,
+  offset,
+  total,
+  onOffsetChange,
+}: AlertsTableProps) {
   return (
     <Card className="shadow-sm border-0">
       <Card.Header className="bg-white border-0 pt-4 px-4">
@@ -65,6 +77,13 @@ export function AlertsTable({ alerts, errorMessage, total, isLoading }: AlertsTa
                 )}
               </tbody>
             </Table>
+            <TablePagination
+              limit={limit}
+              offset={offset}
+              total={total}
+              isLoading={isLoading}
+              onOffsetChange={onOffsetChange}
+            />
           </div>
         )}
       </Card.Body>

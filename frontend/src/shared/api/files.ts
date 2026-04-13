@@ -1,10 +1,14 @@
 import { buildApiUrl } from "../config/api";
 import type { FileItem } from "../types/files";
-import type { PaginatedResponse } from "../types/pagination";
+import type { PaginatedResponse, PaginationParams } from "../types/pagination";
 
 
-export async function fetchFiles() {
-  const response = await fetch(buildApiUrl("/files"), { cache: "no-store" });
+export async function fetchFiles({ limit, offset }: PaginationParams) {
+  const searchParams = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const response = await fetch(buildApiUrl(`/files?${searchParams.toString()}`), { cache: "no-store" });
 
   if (!response.ok) {
     throw new Error("Не удалось загрузить файлы");

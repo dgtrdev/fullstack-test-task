@@ -4,3 +4,8 @@ export type PaginatedResponse<T> = {
   limit: number;
   offset: number;
 };
+
+export type PaginationParams = {
+  limit: number;
+  offset: number;
+};
