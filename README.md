@@ -20,6 +20,10 @@
 
 **Открыть бэк:** ```http://localhost:8000/docs```
 
+**Запуск тестов:**
+1. Backend: ```docker compose -f docker-compose.dev.yml run --rm backend pytest```
+2. Frontend: ```cd frontend && npm test```
+
 ## Выполненные правки
 
 ### Инфраструктура и конфигурация
@@ -59,3 +63,5 @@
 - Добавлена pytest-конфигурация backend; тестовое окружение задаётся в `backend/tests/conftest.py`.
 - Добавлены интеграционные тесты backend-сервисов для пагинации файлов, пагинации алертов и мягкого удаления файла.
 - Запуск backend-тестов: `docker compose -f docker-compose.dev.yml run --rm backend pytest`.
+- Добавлены frontend-тесты на Vitest и Testing Library для обработки API-ошибок, отображения статусов проверки файла и пагинации таблиц.
+- Запуск frontend-тестов: `cd frontend && npm test`.
